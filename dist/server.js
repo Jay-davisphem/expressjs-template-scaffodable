@@ -19,7 +19,6 @@ const Paths_1 = __importDefault(require("./routes/Paths"));
 const config_1 = __importDefault(require("./config"));
 // import HttpStatusCodes from "@src/constants/HttpStatusCodes";
 const misc_1 = require("./config/misc");
-console.debug(config_1.default, misc_1.NodeEnvs);
 // **** Variables **** //
 const API_VERSION_STRING = Paths_1.default.Version1;
 const app = (0, express_1.default)();
