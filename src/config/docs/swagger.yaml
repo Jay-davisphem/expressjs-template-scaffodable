@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: Scaffold API
+  description: SCAFFOLD API
+  termsOfService: /terms-of-use/
+  contact:
+    email: user@gmail.com
+  version: v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserType:
+      type: string
+      enum:
+      - User
+      - Partner
+      - Admin
+
+security:
+- bearerAuth: []
+servers:
+- url: http://localhost:8080/api/v1
+- url: ''
