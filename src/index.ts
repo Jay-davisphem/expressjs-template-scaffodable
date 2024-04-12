@@ -1,7 +1,5 @@
 require('module-alias/register')
 import "./pre-start"; // Must be the first import
-// import logger from "jet-logger";
-
 import EnvVars from "./config";
 import server from "./server";
 

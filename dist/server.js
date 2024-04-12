@@ -7,11 +7,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // import cookieParser from "cookie-parser";
-// import morgan from "morgan";
+const morgan_1 = __importDefault(require("morgan"));
 // import path from "path";
 // import helmet from "helmet";
 const express_1 = __importDefault(require("express"));
-// import logger from "jet-logger";
 // import log from "@src/logger";
 require("express-async-errors");
 // import BaseRouter from "@src/routes/api";
@@ -36,11 +35,12 @@ app.use(express_1.default.urlencoded({ extended: true }));
 // app.use(limiter);
 // Show routes called in console during development
 if (config_1.default.NodeEnv === misc_1.NodeEnvs.Dev.valueOf()) {
-    //   app.use(morgan("dev"));
+    app.use((0, morgan_1.default)('dev'));
 }
 // Security
 if (config_1.default.NodeEnv === misc_1.NodeEnvs.Production.valueOf()) {
     //   app.use(helmet());
+    app.use((0, morgan_1.default)('combined'));
 }
 // Add APIs, must be after middleware
 // app.use(Paths.Base, BaseRouter);

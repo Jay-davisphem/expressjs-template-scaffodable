@@ -3,7 +3,7 @@
  */
 
 // import cookieParser from "cookie-parser";
-// import morgan from "morgan";
+import morgan from "morgan";
 // import path from "path";
 // import helmet from "helmet";
 import express, {
@@ -12,7 +12,6 @@ import express, {
   NextFunction,
   // RequestHandler,
 } from "express";
-// import logger from "jet-logger";
 // import log from "@src/logger";
 import "express-async-errors";
 
@@ -65,12 +64,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Show routes called in console during development
 if (EnvVars.NodeEnv === NodeEnvs.Dev.valueOf()) {
-//   app.use(morgan("dev"));
-}
+  app.use(morgan('dev'));
+} 
 
 // Security
 if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 //   app.use(helmet());
+  app.use(morgan('combined'));
+
 }
 
 // Add APIs, must be after middleware
