@@ -8,6 +8,7 @@ import 'module-alias/register';
 export default {
     NodeEnv: process.env.NODE_ENV ?? "",
     Port: process.env.PORT ?? 0,
+    MONGO_URI: process.env.MONGO_URI as string,
     CookieProps: {
       Key: "ExpressGeneratorTs",
       Secret: process.env.COOKIE_SECRET ?? "",

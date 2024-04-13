@@ -8,6 +8,7 @@ require("module-alias/register");
 exports.default = {
     NodeEnv: (_a = process.env.NODE_ENV) !== null && _a !== void 0 ? _a : "",
     Port: (_b = process.env.PORT) !== null && _b !== void 0 ? _b : 0,
+    MONGO_URI: process.env.MONGO_URI,
     CookieProps: {
         Key: "ExpressGeneratorTs",
         Secret: (_c = process.env.COOKIE_SECRET) !== null && _c !== void 0 ? _c : "",

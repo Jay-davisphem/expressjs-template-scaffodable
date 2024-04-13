@@ -20,6 +20,8 @@ const cors_1 = require("./common/middlewares/cors");
 const rateLimiter_1 = __importDefault(require("./common/middlewares/rateLimiter"));
 const fs_1 = require("fs");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+// import { PrismaClient } from "@prisma/client";
+const misc_2 = require("./common/utils/misc");
 // **** Variables **** //
 const API_VERSION_STRING = '/' + Paths_1.default.Version1;
 const app = (0, express_1.default)();
@@ -86,10 +88,10 @@ app.use(`/api${API_VERSION_STRING}/docs`, swagger_ui_express_1.default.serve, sw
     },
 }));
 // Global Error Handling Middleware - 404 Not Found
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   res.status(HttpStatusCodes.NOT_FOUND).json(new ApiJsonData('error', "Route not found").valueOf());
-// });
-// // Global Error Handling Middleware - 405 Method Not Allowed
+app.use((req, res, next) => {
+    res.status(HTTPStatusCodes_1.default.NOT_FOUND).json(new misc_2.ApiJsonData('error', "Route not found").valueOf());
+});
+// Global Error Handling Middleware - 405 Method Not Allowed
 // app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 //   if (err) {
 //     res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json(new ApiJsonData('error', "Method Not Allowed").valueOf());

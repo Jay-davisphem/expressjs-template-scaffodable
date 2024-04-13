@@ -30,7 +30,6 @@ import swaggerUi from "swagger-ui-express";
 
 
 // import { PrismaClient } from "@prisma/client";
-// import { env } from "process";
 import { ApiJsonData } from "./common/utils/misc";
 // import { Server } from 'socket.io';
 import { createServer } from 'node:http';
@@ -139,11 +138,11 @@ app.use(
 );
 
 // Global Error Handling Middleware - 404 Not Found
-// app.use((req: Request, res: Response, next: NextFunction) => {
-//   res.status(HttpStatusCodes.NOT_FOUND).json(new ApiJsonData('error', "Route not found").valueOf());
-// });
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.status(HttpStatusCodes.NOT_FOUND).json(new ApiJsonData('error', "Route not found").valueOf());
+});
 
-// // Global Error Handling Middleware - 405 Method Not Allowed
+// Global Error Handling Middleware - 405 Method Not Allowed
 // app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 //   if (err) {
 //     res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json(new ApiJsonData('error', "Method Not Allowed").valueOf());

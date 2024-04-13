@@ -16,24 +16,23 @@ require('module-alias/register');
 require("./pre-start"); // Must be the first import
 const config_1 = __importDefault(require("./config"));
 const server_1 = __importDefault(require("./server"));
-// import prisma from "./models/prisma";
-// Just for testing, to be deleted
-// query raw is calling postgres:5432 directly
-// async function main() {
-//   const currentDateFromDatabase = await prisma.$queryRaw`SELECT CURRENT_DATE`;
-//   console.log("Current date from the database:", currentDateFromDatabase);
-// }
+const mongoose_1 = __importDefault(require("mongoose"));
+function main() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield mongoose_1.default.connect(config_1.default.MONGO_URI);
+    });
+}
 // **** Run **** //
 const SERVER_START_MSG = "Express server started on port: " + config_1.default.Port.toString();
-const expressServer = server_1.default.listen(config_1.default.Port, () => __awaiter(void 0, void 0, void 0, function* () {
-    //   logger.info(SERVER_START_MSG);
-    console.log("started app on port ", config_1.default.Port);
-    // try {
-    //   await main();
-    // } catch (err) {
-    //   console.error(err);
-    // }
-}));
+const DB_CONNECTION_MSG = 'Connected to db@ ' + config_1.default.MONGO_URI;
+let expressServer = null;
+main().then(res => {
+    console.log(DB_CONNECTION_MSG);
+    expressServer = server_1.default.listen(config_1.default.Port, () => __awaiter(void 0, void 0, void 0, function* () {
+        //   logger.info(SERVER_START_MSG);
+        console.log("started app on port ", config_1.default.Port);
+    }));
+}).catch(console.error);
 function handleTerminationSignal(signal_1) {
     return __awaiter(this, arguments, void 0, function* (signal, server = expressServer) {
         console.log(`Received ${signal} signal. Closing server and disconnecting from the database...`);

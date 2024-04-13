@@ -2,31 +2,30 @@ require('module-alias/register')
 import "./pre-start"; // Must be the first import
 import EnvVars from "./config";
 import server from "./server";
+import { Server } from "http";
+import mongoose from "mongoose";
 
-// import prisma from "./models/prisma";
 
-// Just for testing, to be deleted
-// query raw is calling postgres:5432 directly
-// async function main() {
-//   const currentDateFromDatabase = await prisma.$queryRaw`SELECT CURRENT_DATE`;
-//   console.log("Current date from the database:", currentDateFromDatabase);
-// }
+async function main() {
+  await mongoose.connect(EnvVars.MONGO_URI);
+}
 
 // **** Run **** //
 
 const SERVER_START_MSG =
   "Express server started on port: " + EnvVars.Port.toString();
 
-const expressServer = server.listen(EnvVars.Port, async () => {
-//   logger.info(SERVER_START_MSG);
-  console.log("started app on port ", EnvVars.Port);
+const DB_CONNECTION_MSG = 'Connected to db@ ' + EnvVars.MONGO_URI
 
-  // try {
-  //   await main();
-  // } catch (err) {
-  //   console.error(err);
-  // }
-});
+ 
+let expressServer: any = null;
+main().then(res => {
+  console.log(DB_CONNECTION_MSG)
+  expressServer = server.listen(EnvVars.Port, async () => {
+  //   logger.info(SERVER_START_MSG);
+    console.log("started app on port ", EnvVars.Port);
+  });
+}).catch(console.error)
 
 async function handleTerminationSignal(signal: string, server = expressServer) {
   console.log(
@@ -38,4 +37,4 @@ async function handleTerminationSignal(signal: string, server = expressServer) {
 }
 
 process.on("SIGINT", () => handleTerminationSignal("SIGINT"));
-process.on("SIGTERM", () => handleTerminationSignal("SIGTERM"));
+process.on("SIGTERM", () => handleTerminationSignal("SIGTERM"))
