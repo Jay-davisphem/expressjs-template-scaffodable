@@ -23,11 +23,14 @@ export default class UserController{
         try{
             const encryptedData = encryptionServiceInstance.encrypt(userDetails)
             
-            await this.userService.saveEncryptedData(userDetails, encryptedData)
+            // Generate securityCode encrypt, save and pass it to emailService
+            const securityCode = ''
+            await this.userService.saveEncryptedData(userDetails, encryptedData, securityCode)
             
             const callbackUrl = req.params.callbackUrl
+
             
-            const emailService = await this.userService.createEmailService(userDetails, encryptedData, callbackUrl)
+            const emailService = await this.userService.createEmailService(userDetails, encryptedData, securityCode, callbackUrl)
             const eRes = await emailService.sendEmail()
             
             console.log(eRes)
@@ -41,14 +44,48 @@ export default class UserController{
             session.endSession();
             res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(new ApiJsonData('error', 'Error', {error: err}))
         }
-        
     }
 
+    getEncryptedData = async (req: Request, res: Response) => {
+        try{
+
+            const {encryptedData, securityCode} = req.body;
+            if (!securityCode){
+                throw new Error("Invalid Security Code! Please provide security code sent via email.")
+            }
+            const token = await Token.findOne({ token: encryptedData })
+            
+            // Check if the encryptedData exists and if the token is valid
+            if (!encryptedData || !token) {
+                throw new Error("Invalid Token");
+            }
+            const isValidSecurityCode = await encryptionServiceInstance.comparePassword(securityCode, token.securityCode)
+            if (!isValidSecurityCode){
+                throw new Error('Invalid Security Code.')
+            }
+
+            // Decrypt the encrypted data
+            let data: IUser = encryptionServiceInstance.decrypt(encryptedData);
+            return res.status(HttpStatusCodes.OK).json(new ApiJsonData('success', 'Data decoded', data).valueOf())
+        }catch(err: any){
+            // Handle specific error messages
+            if ((err.message as string).startsWith('Invalid')) {
+                return res.status(HttpStatusCodes.BAD_REQUEST).json(new ApiJsonData('error', err.message).valueOf());
+            }
+            
+            // Handle generic internal server errors
+            res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json(new ApiJsonData('error', err.message));
+        }
+
+    }
     
 
     completeRegistration = async (req: Request, res: Response) => {
         try {
-            const encryptedData = req.body?.encryptedData;
+            const {encryptedData, securityCode} = req.body;
+            if (!securityCode){
+                throw new Error("Invalid Security Code! Please provide security code sent via email.")
+            }
             const token = await Token.findOne({ token: encryptedData })
             
             // Check if the encryptedData exists and if the token is valid
@@ -56,6 +93,10 @@ export default class UserController{
                 throw new Error("Invalid Token");
             }
             
+            const isValidSecurityCode = await encryptionServiceInstance.comparePassword(securityCode, token.securityCode)
+            if (!isValidSecurityCode){
+                throw new Error('Invalid Security Code.')
+            }
             // Decrypt the encrypted data
             let data: IUser = encryptionServiceInstance.decrypt(encryptedData);
             console.log('decrypted data', data)
@@ -89,7 +130,7 @@ export default class UserController{
         } catch (err: any) {
             console.error('error', err)
             // Handle specific error messages
-            if (err.message === 'Invalid Token' || err.message === 'No Password') {
+            if ((err.message as string).startsWith('Invalid') || err.message === 'No Password') {
                 return res.status(HttpStatusCodes.BAD_REQUEST).json(new ApiJsonData('error', err.message).valueOf());
             }
             

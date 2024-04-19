@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const config_1 = __importDefault(require("../config"));
-const htmlContent = (title, message, url) => `
+const htmlContent = (title, message, url, securityCode) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,15 +54,17 @@ const htmlContent = (title, message, url) => `
 <body>
   <div class="container">
     <h1>${title}!</h1>
+    <p>Security code: ${securityCode}</p>
+    <p>Do not share the security code with anyone.</p>
     <p>${message}. <a href="${url !== null && url !== void 0 ? url : ''}" title="Click link">Click Here</a></p>
   </div>
 </body>
 </html>
 `;
 class EmailService {
-    constructor(subject, title, message, to, url) {
+    constructor(subject, title, message, to, securityCode, url) {
         this.getHtmlContent = (subject, title, message, url) => {
-            return htmlContent(title, message, url);
+            return htmlContent(title, message, url, this.securityCode);
         };
         this.sendEmail = () => __awaiter(this, void 0, void 0, function* () {
             let val = '';
@@ -84,6 +86,7 @@ class EmailService {
         this.title = title;
         this.message = message;
         this.to = to;
+        this.securityCode = securityCode;
         this.htmlContent = this.getHtmlContent(subject, title, message, url);
     }
     get transporter() {

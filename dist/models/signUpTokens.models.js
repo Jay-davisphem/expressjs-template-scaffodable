@@ -32,7 +32,8 @@ const config_1 = __importDefault(require("../config"));
 const schemaUtils_1 = require("../common/utils/schemaUtils");
 const tokenSchema = new mongoose_1.Schema({
     email: { type: String, required: true, unique: true },
-    token: { type: String, required: true },
+    token: { type: String, required: true, unique: true },
+    securityCode: { type: String, required: true },
     expiresAt: { type: Date, default: Date.now, expires: config_1.default.EXPIRES_DURATION }
 }, { versionKey: false, timestamps: true });
 (0, schemaUtils_1.generateToJSONMethod)(tokenSchema);

@@ -7,6 +7,7 @@ import { generateToJSONMethod } from "../common/utils/schemaUtils";
 interface IToken {
     email: string;
     token: string;
+    securityCode: string;
     expiresAt: Date;
   }
   
@@ -16,7 +17,8 @@ interface IToken {
   
   const tokenSchema: Schema<TokenDoc> = new Schema({
     email: {type: String, required: true, unique: true},
-    token: {type: String, required: true},
+    token: {type: String, required: true, unique: true},
+    securityCode: {type: String, required: true},
     expiresAt: {type: Date, default: Date.now, expires: EnvVars.EXPIRES_DURATION }
   }, { versionKey: false, timestamps: true });
   

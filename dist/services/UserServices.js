@@ -15,11 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const models_1 = require("../models");
 const EmailService_1 = __importDefault(require("./EmailService"));
 const config_1 = __importDefault(require("../config"));
+const EncryptionService_1 = __importDefault(require("./EncryptionService"));
 class UserService {
     constructor(user, token) {
         this.user = user;
         this.token = token;
-        this.saveEncryptedData = (userDetails, encryptedData, session) => __awaiter(this, void 0, void 0, function* () {
+        this.saveEncryptedData = (userDetails, encryptedData, securityCode) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             const userExists = yield this.user.findOne({ email: userDetails.email });
             if (userExists) {
@@ -31,14 +32,16 @@ class UserService {
                 // If a token already exists, throw an error
                 throw new Error(`Token for the user with email ${userDetails.email} has already been created.`);
             }
+            const _securityCode = EncryptionService_1.default.encryptPassword(securityCode);
             const token = yield ((_b = this.token) === null || _b === void 0 ? void 0 : _b.create({
                 email: userDetails.email,
                 token: encryptedData,
+                securityCode: _securityCode
             }));
             return token;
         });
-        this.createEmailService = (userDetails, encryptedData, callbackUrl) => __awaiter(this, void 0, void 0, function* () {
-            return new EmailService_1.default('Account Initialization', 'Acount Initialization', 'Click the following link to complete your registration', userDetails.email, `${callbackUrl !== null && callbackUrl !== void 0 ? callbackUrl : config_1.default.BASE_URL + '/v1/complete-registration'}/${encryptedData}`);
+        this.createEmailService = (userDetails, encryptedData, securityCode, callbackUrl) => __awaiter(this, void 0, void 0, function* () {
+            return new EmailService_1.default('Account Initialization', 'Acount Initialization', 'Click the following link to complete your registration', userDetails.email, securityCode, `${callbackUrl !== null && callbackUrl !== void 0 ? callbackUrl : config_1.default.BASE_URL + '/v1/complete-registration'}/${encryptedData}`);
         });
         this.createUser = (data) => __awaiter(this, void 0, void 0, function* () {
             let user = new models_1.User(data);

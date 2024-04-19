@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import EnvVars from '../config'
 
-const htmlContent = (title: string, message: string, url: string) => `
+const htmlContent = (title: string, message: string, url: string, securityCode: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,6 +41,8 @@ const htmlContent = (title: string, message: string, url: string) => `
 <body>
   <div class="container">
     <h1>${title}!</h1>
+    <p>Security code: ${securityCode}</p>
+    <p>Do not share the security code with anyone.</p>
     <p>${message}. <a href="${url??''}" title="Click link">Click Here</a></p>
   </div>
 </body>
@@ -54,17 +56,19 @@ export default class EmailService {
     title: string;
     subject: string;
     to: string
-    constructor(subject: string, title: string, message: string, to: string, url?: string){
+    securityCode: string;
+    constructor(subject: string, title: string, message: string, to: string, securityCode: string, url?: string){
         this.subject = subject
         this.email = EnvVars.ADMIN_MAIL
         this.title = title
         this.message = message
         this.to = to
+        this.securityCode = securityCode
         this.htmlContent = this.getHtmlContent(subject, title, message, url)
     }
 
     private getHtmlContent = (subject: string, title: string, message: string, url?: string) => {
-        return htmlContent(title, message, url as string)
+        return htmlContent(title, message, url as string, this.securityCode)
     }
 
     private get transporter(): nodemailer.Transporter {
