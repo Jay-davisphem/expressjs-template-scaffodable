@@ -6,6 +6,9 @@ info:
   contact:
     email: user@gmail.com
   version: v1
+tags:
+- name: users
+  description: Operations related to users
 components:
   securitySchemes:
     bearerAuth:
@@ -19,9 +22,89 @@ components:
       - User
       - Partner
       - Admin
-
+    IUser:
+      type: object
+      properties:
+      # Define properties of IUser schema here
+    ApiJsonData:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        data:
 security:
 - bearerAuth: []
 servers:
 - url: http://localhost:8080/api/v1
+  description: Local server
 - url: ''
+  description: Production server
+
+paths:
+  /users/register-init:
+    post:
+      summary: Initialize user registration
+      description: |
+        Initiates the registration process for a new user.
+      tags:
+      - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IUser' # Assuming IUser schema definition exists
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJsonData'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJsonData'
+  /users:
+    post:
+      summary: Complete user registration
+      description: "Completes the registration process for a new user. \nIt decrypts the encrypted data and performs necessary registration operations, including password encryption.\n"
+      tags:
+      - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                encryptedData:
+                  type: string
+                  description: Encrypted data for user registration
+                data:
+                  type: object
+                  description: Other user data you wish to add or change
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJsonData'
+        '400':
+          description: Bad Request - Invalid Token or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJsonData'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiJsonData'
+

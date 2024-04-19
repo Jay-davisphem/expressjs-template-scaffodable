@@ -37,7 +37,7 @@ export function generateOTP(length: number) {
 interface IRetJson {
   status: string;
   message: string;
-  data?: { [key: string]: any };
+  data?: { [key: string]: any } | string | number;
 }
 
 export class ApiJsonData {

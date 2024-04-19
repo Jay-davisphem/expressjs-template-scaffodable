@@ -7,7 +7,6 @@ const generateToJSONMethod = (schema) => {
         const obj = (_a = this === null || this === void 0 ? void 0 : this.toObject) === null || _a === void 0 ? void 0 : _a.call(this);
         if (obj) {
             delete obj.password;
-            delete obj._id;
         }
         return obj;
     };

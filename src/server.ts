@@ -14,7 +14,7 @@ import express, {
 } from "express";
 import "express-async-errors";
 
-// import BaseRouter from "@src/routes/api";
+import BaseRouter from "./routes";
 import Paths from "./routes/Paths";
 
 import EnvVars from "./config";
@@ -34,9 +34,11 @@ import { ApiJsonData } from "./common/utils/misc";
 // import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
+// import './tests/mail.test'
+
 // **** Variables **** //
 
-const API_VERSION_STRING = '/' + Paths.Version1;
+const API_VERSION_STRING = '/' + Paths.Version;
 
 const app = express();
 
@@ -77,7 +79,7 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 }
 
 // Add APIs, must be after middleware
-// app.use(Paths.Base, BaseRouter);
+app.use(Paths.Base, BaseRouter);
 // Add error handler
 
 
@@ -102,14 +104,14 @@ app.use(
 
 
 // Set static directory (js and css);
-// const staticDir = path.join(__dirname, "public");
-// app.use(express.static(staticDir));
+const staticDir = path.join(__dirname, "public");
+app.use(express.static(staticDir));
 
-// app.use("/uploads", express.static("./public/uploads"));
+app.use("/uploads", express.static("./public/uploads"));
 
 // Nav to users pg by default
 app.get("/", (_: Request, res: Response) => {
-  return res.send("WELCONE TO EXPRESSJS-TEMPLATE-SCAFFODABLE PROJECT");
+  return res.status(HttpStatusCodes.OK).json("WELCONE TO EXPRESSJS-TEMPLATE-SCAFFODABLE PROJECT");
 });
 
 //--- Serving swagger.yaml
@@ -136,20 +138,23 @@ app.use(
     },
   ),
 );
-
 // Global Error Handling Middleware - 404 Not Found
 app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(HttpStatusCodes.NOT_FOUND).json(new ApiJsonData('error', "Route not found").valueOf());
+  if (100 <= res.statusCode && res.statusCode  <= 308){
+    throw new Error("Method Not Allowed")
+  }else{
+    res.status(HttpStatusCodes.NOT_FOUND).json(new ApiJsonData('error', "Route not found").valueOf());
+  }
+});
+// Global Error Handling Middleware - 405 Method Not Allowed
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json(new ApiJsonData('error', "Method Not Allowed").valueOf());
 });
 
-// Global Error Handling Middleware - 405 Method Not Allowed
-// app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-//   if (err) {
-//     res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json(new ApiJsonData('error', "Method Not Allowed").valueOf());
-//   } else {
-//     next();
-//   }
-// });
+process.on('unhandledRejection', (error: any) => {
+  console.log('unhandledRejection', error.message);
+});
 // **** Export default **** //
+
 
 export default app;

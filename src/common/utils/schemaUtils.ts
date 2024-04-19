@@ -3,7 +3,6 @@ export const generateToJSONMethod = (schema: any) => {
       const obj = this?.toObject?.();
       if (obj) {
         delete obj.password;
-        delete obj._id;
       }
       return obj;
     };

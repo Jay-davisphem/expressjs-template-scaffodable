@@ -17,9 +17,22 @@ require("./pre-start"); // Must be the first import
 const config_1 = __importDefault(require("./config"));
 const server_1 = __importDefault(require("./server"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const node_cron_1 = __importDefault(require("node-cron"));
+const models_1 = require("./models");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         yield mongoose_1.default.connect(config_1.default.MONGO_URI);
+        // Define a cron job to delete expired tokens every 5 minutes
+        node_cron_1.default.schedule('*/30 * * * *', () => __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Find and delete expired tokens
+                const result = yield models_1.Token.deleteMany({ expiresAt: { $lte: new Date() } });
+                console.log(`Deleted ${result.deletedCount} expired tokens`);
+            }
+            catch (error) {
+                console.error('Error deleting expired tokens:', error);
+            }
+        }));
     });
 }
 // **** Run **** //

@@ -4,10 +4,21 @@ import EnvVars from "./config";
 import server from "./server";
 import { Server } from "http";
 import mongoose from "mongoose";
-
+import cron from "node-cron";
+import { Token } from "./models";
 
 async function main() {
   await mongoose.connect(EnvVars.MONGO_URI);
+  // Define a cron job to delete expired tokens every 5 minutes
+cron.schedule('*/30 * * * *', async () => {
+  try {
+    // Find and delete expired tokens
+    const result = await Token.deleteMany({ expiresAt: { $lte: new Date() } });
+    console.log(`Deleted ${result.deletedCount} expired tokens`);
+  } catch (error) {
+    console.error('Error deleting expired tokens:', error);
+  }
+});
 }
 
 // **** Run **** //
@@ -24,6 +35,7 @@ main().then(res => {
   expressServer = server.listen(EnvVars.Port, async () => {
   //   logger.info(SERVER_START_MSG);
     console.log("started app on port ", EnvVars.Port);
+
   });
 }).catch(console.error)
 

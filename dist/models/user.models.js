@@ -29,16 +29,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const PermissionEnum_1 = __importDefault(require("./enums/PermissionEnum"));
-const schemaUtils_1 = require("@/common/utils/schemaUtils");
+const schemaUtils_1 = require("../common/utils/schemaUtils");
+const RoleEnum_1 = __importDefault(require("./enums/RoleEnum"));
+const commonDict = { type: String, required: true };
 const userSchemaFields = {
-    username: { type: String, required: true, unique: true },
+    username: Object.assign(Object.assign({}, commonDict), { unique: true }),
     password: { type: String },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    phone: { type: String, required: true },
-    permissions: [{ type: String, enum: Object.values(PermissionEnum_1.default), default: PermissionEnum_1.default.getNormalUserDefault() }] // Array of enum values
+    firstName: commonDict,
+    lastName: commonDict,
+    phone: commonDict,
+    email: {
+        type: String,
+        unique: [true, "email already exists in database!"],
+        lowercase: true,
+        trim: true,
+        required: [true, "email not provided"],
+        validate: {
+            validator: function (v) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+            },
+            message: '{VALUE} is not a valid email!'
+        }
+    },
+    permissions: [{ type: String, enum: Object.values(PermissionEnum_1.default), default: PermissionEnum_1.default.getNormalUserDefault(),
+            required: [true, "Please specify user permission"],
+        }],
+    role: {
+        type: String, enum: Object.values(RoleEnum_1.default), default: RoleEnum_1.default.GUEST,
+        required: [true, "Please specify user role"]
+    }
 };
-const userSchema = new mongoose_1.Schema(userSchemaFields, { versionKey: false });
+const userSchema = new mongoose_1.Schema(userSchemaFields, { versionKey: false, timestamps: true });
 (0, schemaUtils_1.generateToJSONMethod)(userSchema);
 const User = mongoose_1.default.model('User', userSchema);
 exports.User = User;

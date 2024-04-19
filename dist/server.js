@@ -8,10 +8,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const morgan_1 = __importDefault(require("morgan"));
+const path_1 = __importDefault(require("path"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_1 = __importDefault(require("express"));
 require("express-async-errors");
-// import BaseRouter from "@src/routes/api";
+const routes_1 = __importDefault(require("./routes"));
 const Paths_1 = __importDefault(require("./routes/Paths"));
 const config_1 = __importDefault(require("./config"));
 const HTTPStatusCodes_1 = __importDefault(require("./common/utils/HTTPStatusCodes"));
@@ -22,8 +23,9 @@ const fs_1 = require("fs");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 // import { PrismaClient } from "@prisma/client";
 const misc_2 = require("./common/utils/misc");
+// import './tests/mail.test'
 // **** Variables **** //
-const API_VERSION_STRING = '/' + Paths_1.default.Version1;
+const API_VERSION_STRING = '/' + Paths_1.default.Version;
 const app = (0, express_1.default)();
 // const prisma = new PrismaClient();
 // const io = new Server(createServer(app));
@@ -53,7 +55,7 @@ if (config_1.default.NodeEnv === misc_1.NodeEnvs.Production.valueOf()) {
     });
 }
 // Add APIs, must be after middleware
-// app.use(Paths.Base, BaseRouter);
+app.use(Paths_1.default.Base, routes_1.default);
 // Add error handler
 app.use((err, _, res, 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,12 +70,12 @@ next) => {
     return res.status(status).json({ error: err.message });
 });
 // Set static directory (js and css);
-// const staticDir = path.join(__dirname, "public");
-// app.use(express.static(staticDir));
-// app.use("/uploads", express.static("./public/uploads"));
+const staticDir = path_1.default.join(__dirname, "public");
+app.use(express_1.default.static(staticDir));
+app.use("/uploads", express_1.default.static("./public/uploads"));
 // Nav to users pg by default
 app.get("/", (_, res) => {
-    return res.send("WELCONE TO EXPRESSJS-TEMPLATE-SCAFFODABLE PROJECT");
+    return res.status(HTTPStatusCodes_1.default.OK).json("WELCONE TO EXPRESSJS-TEMPLATE-SCAFFODABLE PROJECT");
 });
 //--- Serving swagger.yaml
 app.get(`/api${API_VERSION_STRING}/docs/swagger.yaml`, (req, res) => {
@@ -89,15 +91,19 @@ app.use(`/api${API_VERSION_STRING}/docs`, swagger_ui_express_1.default.serve, sw
 }));
 // Global Error Handling Middleware - 404 Not Found
 app.use((req, res, next) => {
-    res.status(HTTPStatusCodes_1.default.NOT_FOUND).json(new misc_2.ApiJsonData('error', "Route not found").valueOf());
+    if (100 <= res.statusCode && res.statusCode <= 308) {
+        throw new Error("Method Not Allowed");
+    }
+    else {
+        res.status(HTTPStatusCodes_1.default.NOT_FOUND).json(new misc_2.ApiJsonData('error', "Route not found").valueOf());
+    }
 });
 // Global Error Handling Middleware - 405 Method Not Allowed
-// app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-//   if (err) {
-//     res.status(HttpStatusCodes.METHOD_NOT_ALLOWED).json(new ApiJsonData('error', "Method Not Allowed").valueOf());
-//   } else {
-//     next();
-//   }
-// });
+app.use((err, req, res, next) => {
+    res.status(HTTPStatusCodes_1.default.METHOD_NOT_ALLOWED).json(new misc_2.ApiJsonData('error', "Method Not Allowed").valueOf());
+});
+process.on('unhandledRejection', (error) => {
+    console.log('unhandledRejection', error.message);
+});
 // **** Export default **** //
 exports.default = app;
