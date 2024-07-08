@@ -81,12 +81,16 @@ class UserController {
             try {
                 const { encryptedData, securityCode } = req.body;
                 if (!securityCode) {
-                    throw new Error("Please provide security code sent via email.");
+                    throw new Error("Invalid Security Code! Please provide security code sent via email.");
                 }
                 const token = yield models_1.Token.findOne({ token: encryptedData });
                 // Check if the encryptedData exists and if the token is valid
                 if (!encryptedData || !token) {
                     throw new Error("Invalid Token");
+                }
+                const isValidSecurityCode = yield EncryptionService_1.default.comparePassword(securityCode, token.securityCode);
+                if (!isValidSecurityCode) {
+                    throw new Error('Invalid Security Code.');
                 }
                 // Decrypt the encrypted data
                 let data = EncryptionService_1.default.decrypt(encryptedData);
@@ -118,7 +122,7 @@ class UserController {
             catch (err) {
                 console.error('error', err);
                 // Handle specific error messages
-                if (err.message === 'Invalid Token' || err.message === 'No Password') {
+                if (err.message.startsWith('Invalid') || err.message === 'No Password') {
                     return res.status(HTTPStatusCodes_1.default.BAD_REQUEST).json(new misc_1.ApiJsonData('error', err.message).valueOf());
                 }
                 // Handle generic internal server errors
